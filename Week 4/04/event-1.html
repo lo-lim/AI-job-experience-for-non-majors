@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM event 객체</title>
+  <style>
+    #container {
+      width:300px;
+      margin:10px auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <img src="images/cup-1.png" id="cup">		
+  </div>
+
+<!-- 1. 함수를 따로 빼놓지 않을 경우 -->
+	<!-- <script>
+		var cup = document.querySelector("#cup");  // id = cup인 요소를 가져옴
+    cup.onclick = function(){         // 이벤트 발생 (onclick) 시 실행할 함수 기입
+      alert("이미지를 클릭했습니다");
+    }
+	</script> -->
+
+<!-- 2. 함수를 따로 빼놓을 경우 -->
+
+<!-- <script>
+  var cup = document.querySelector("#cup")
+  cup.onclick = changePic   // 이땐 괄호 없이 함수명만 사용한다.
+  function changePic() {
+    cup.src = "images/cup-2.png"
+  }  
+</script> -->
+
+<!-- 예약어 사용 예제 -->
+
+<!-- <script>
+  var cup = document.querySelector('#cup')
+  cup.onclick = function() {
+    alert("현재 이미지 파일의 경로는 " + this.src)
+  }
+</script> -->
+
+
+</body>
+</html>
