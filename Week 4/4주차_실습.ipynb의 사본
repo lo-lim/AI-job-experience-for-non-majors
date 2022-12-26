@@ -1,0 +1,658 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "lF0xoYKb7nQB"
+      },
+      "source": [
+        "# 4주차 : "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "3e-JjvTm5hj_"
+      },
+      "outputs": [],
+      "source": [
+        "# HuggingFace Transformers 라이브러리를 설치합니다.\n",
+        "!pip install -q transformers"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "87Z0Wg395tQ9",
+        "outputId": "8383c2d1-6d9d-4dc6-8328-5e31aecf5b86"
+      },
+      "outputs": [
+        {
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--klue--bert-base/snapshots/812449f1a6bc736e693db7aa0e513e5e90795a62/config.json\n",
+            "Model config BertConfig {\n",
+            "  \"_name_or_path\": \"klue/bert-base\",\n",
+            "  \"architectures\": [\n",
+            "    \"BertForMaskedLM\"\n",
+            "  ],\n",
+            "  \"attention_probs_dropout_prob\": 0.1,\n",
+            "  \"classifier_dropout\": null,\n",
+            "  \"hidden_act\": \"gelu\",\n",
+            "  \"hidden_dropout_prob\": 0.1,\n",
+            "  \"hidden_size\": 768,\n",
+            "  \"initializer_range\": 0.02,\n",
+            "  \"intermediate_size\": 3072,\n",
+            "  \"layer_norm_eps\": 1e-12,\n",
+            "  \"max_position_embeddings\": 512,\n",
+            "  \"model_type\": \"bert\",\n",
+            "  \"num_attention_heads\": 12,\n",
+            "  \"num_hidden_layers\": 12,\n",
+            "  \"pad_token_id\": 0,\n",
+            "  \"position_embedding_type\": \"absolute\",\n",
+            "  \"transformers_version\": \"4.22.1\",\n",
+            "  \"type_vocab_size\": 2,\n",
+            "  \"use_cache\": true,\n",
+            "  \"vocab_size\": 32000\n",
+            "}\n",
+            "\n",
+            "loading file vocab.txt from cache at /root/.cache/huggingface/hub/models--klue--bert-base/snapshots/812449f1a6bc736e693db7aa0e513e5e90795a62/vocab.txt\n",
+            "loading file tokenizer.json from cache at /root/.cache/huggingface/hub/models--klue--bert-base/snapshots/812449f1a6bc736e693db7aa0e513e5e90795a62/tokenizer.json\n",
+            "loading file added_tokens.json from cache at None\n",
+            "loading file special_tokens_map.json from cache at /root/.cache/huggingface/hub/models--klue--bert-base/snapshots/812449f1a6bc736e693db7aa0e513e5e90795a62/special_tokens_map.json\n",
+            "loading file tokenizer_config.json from cache at /root/.cache/huggingface/hub/models--klue--bert-base/snapshots/812449f1a6bc736e693db7aa0e513e5e90795a62/tokenizer_config.json\n",
+            "loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--klue--bert-base/snapshots/812449f1a6bc736e693db7aa0e513e5e90795a62/config.json\n",
+            "Model config BertConfig {\n",
+            "  \"_name_or_path\": \"klue/bert-base\",\n",
+            "  \"architectures\": [\n",
+            "    \"BertForMaskedLM\"\n",
+            "  ],\n",
+            "  \"attention_probs_dropout_prob\": 0.1,\n",
+            "  \"classifier_dropout\": null,\n",
+            "  \"hidden_act\": \"gelu\",\n",
+            "  \"hidden_dropout_prob\": 0.1,\n",
+            "  \"hidden_size\": 768,\n",
+            "  \"initializer_range\": 0.02,\n",
+            "  \"intermediate_size\": 3072,\n",
+            "  \"layer_norm_eps\": 1e-12,\n",
+            "  \"max_position_embeddings\": 512,\n",
+            "  \"model_type\": \"bert\",\n",
+            "  \"num_attention_heads\": 12,\n",
+            "  \"num_hidden_layers\": 12,\n",
+            "  \"pad_token_id\": 0,\n",
+            "  \"position_embedding_type\": \"absolute\",\n",
+            "  \"transformers_version\": \"4.22.1\",\n",
+            "  \"type_vocab_size\": 2,\n",
+            "  \"use_cache\": true,\n",
+            "  \"vocab_size\": 32000\n",
+            "}\n",
+            "\n"
+          ]
+        }
+      ],
+      "source": [
+        "from transformers import AutoModelForSequenceClassification, Trainer, AutoTokenizer\n",
+        "import numpy as np\n",
+        "\n",
+        "tokenizer = AutoTokenizer.from_pretrained(\"klue/bert-base\")\n",
+        "id2label = {0: '날씨 묻기', 1: '관광지 추천', 2: '숙소 추천', 3: '맛집 추천', 4: '인사', 5: '소개', 6:'활동 추천', 7:'카페 추천'}"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ipnjd4Fq5zKV",
+        "outputId": "63b3bb7e-2f75-486a-cf7e-62e087967f6f"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Drive already mounted at /content/drive; to attempt to forcibly remount, call drive.mount(\"/content/drive\", force_remount=True).\n"
+          ]
+        }
+      ],
+      "source": [
+        "# 저장한 모델을 불러오기 위해 구글 드라이브에 마운트합니다.\n",
+        "from google.colab import drive\n",
+        "drive.mount('/content/drive')"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "NaKW6quG5f5J",
+        "outputId": "d8f8e33c-2e61-4ad5-e72f-f1e39cdc4ad5"
+      },
+      "outputs": [
+        {
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "loading configuration file /content/drive/MyDrive/중정처/이대/week_4/06/my_model/config.json\n",
+            "Model config BertConfig {\n",
+            "  \"_name_or_path\": \"/content/drive/MyDrive/\\uc911\\uc815\\ucc98/\\uc774\\ub300/week_4/06/my_model\",\n",
+            "  \"architectures\": [\n",
+            "    \"BertForSequenceClassification\"\n",
+            "  ],\n",
+            "  \"attention_probs_dropout_prob\": 0.1,\n",
+            "  \"classifier_dropout\": null,\n",
+            "  \"hidden_act\": \"gelu\",\n",
+            "  \"hidden_dropout_prob\": 0.1,\n",
+            "  \"hidden_size\": 768,\n",
+            "  \"id2label\": {\n",
+            "    \"0\": \"\\ub0a0\\uc528 \\ubb3b\\uae30\",\n",
+            "    \"1\": \"\\uad00\\uad11\\uc9c0 \\ucd94\\ucc9c\",\n",
+            "    \"2\": \"\\uc219\\uc18c \\ucd94\\ucc9c\",\n",
+            "    \"3\": \"\\ub9db\\uc9d1 \\ucd94\\ucc9c\",\n",
+            "    \"4\": \"\\uc778\\uc0ac\",\n",
+            "    \"5\": \"\\uc18c\\uac1c\",\n",
+            "    \"6\": \"\\ud65c\\ub3d9 \\ucd94\\ucc9c\",\n",
+            "    \"7\": \"\\uce74\\ud398 \\ucd94\\ucc9c\"\n",
+            "  },\n",
+            "  \"initializer_range\": 0.02,\n",
+            "  \"intermediate_size\": 3072,\n",
+            "  \"label2id\": {\n",
+            "    \"\\uad00\\uad11\\uc9c0 \\ucd94\\ucc9c\": 1,\n",
+            "    \"\\ub0a0\\uc528 \\ubb3b\\uae30\": 0,\n",
+            "    \"\\ub9db\\uc9d1 \\ucd94\\ucc9c\": 3,\n",
+            "    \"\\uc18c\\uac1c\": 5,\n",
+            "    \"\\uc219\\uc18c \\ucd94\\ucc9c\": 2,\n",
+            "    \"\\uc778\\uc0ac\": 4,\n",
+            "    \"\\uce74\\ud398 \\ucd94\\ucc9c\": 7,\n",
+            "    \"\\ud65c\\ub3d9 \\ucd94\\ucc9c\": 6\n",
+            "  },\n",
+            "  \"layer_norm_eps\": 1e-12,\n",
+            "  \"max_position_embeddings\": 512,\n",
+            "  \"model_type\": \"bert\",\n",
+            "  \"num_attention_heads\": 12,\n",
+            "  \"num_hidden_layers\": 12,\n",
+            "  \"pad_token_id\": 0,\n",
+            "  \"position_embedding_type\": \"absolute\",\n",
+            "  \"problem_type\": \"multi_label_classification\",\n",
+            "  \"torch_dtype\": \"float32\",\n",
+            "  \"transformers_version\": \"4.22.1\",\n",
+            "  \"type_vocab_size\": 2,\n",
+            "  \"use_cache\": true,\n",
+            "  \"vocab_size\": 32000\n",
+            "}\n",
+            "\n",
+            "loading weights file /content/drive/MyDrive/중정처/이대/week_4/06/my_model/pytorch_model.bin\n",
+            "All model checkpoint weights were used when initializing BertForSequenceClassification.\n",
+            "\n",
+            "All the weights of BertForSequenceClassification were initialized from the model checkpoint at /content/drive/MyDrive/중정처/이대/week_4/06/my_model.\n",
+            "If your task is similar to the task the model of the checkpoint was trained on, you can already use BertForSequenceClassification for predictions without further training.\n",
+            "No `TrainingArguments` passed, using `output_dir=tmp_trainer`.\n",
+            "PyTorch: setting up devices\n",
+            "The default value for the training argument `--report_to` will change in v5 (from all installed integrations to none). In v5, you will need to use `--report_to all` to get the same behavior as now. You should start updating your code and make this info disappear :-).\n"
+          ]
+        }
+      ],
+      "source": [
+        "# 모델 불러오기 (경로 수정 필요 -> 모델 관련 파일들을 모아놓은 폴더의 경로)\n",
+        "model = AutoModelForSequenceClassification.from_pretrained(\"/content/drive/MyDrive/중정처/이대/week_4/06/my_model\", local_files_only=True)\n",
+        "trainer = Trainer(model=model)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "YEjuun5187im"
+      },
+      "outputs": [],
+      "source": [
+        "def inference(text):\n",
+        "  encoding = tokenizer(text, return_tensors = 'pt')\n",
+        "  encoding = {k: v.to(trainer.model.device) for k,v in encoding.items()}\n",
+        "\n",
+        "  outputs = trainer.model(**encoding)\n",
+        "  logits = outputs.logits\n",
+        "\n",
+        "  probs = logits.squeeze().cpu()\n",
+        "  predictions = np.where(probs==probs.max(), 1, 0)\n",
+        "  predicted_labels = [id2label[idx] for idx, label in enumerate(predictions) if label == 1.0]\n",
+        "\n",
+        "  return predicted_labels[0]"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "gua62cry9Qvq",
+        "outputId": "66ea506f-41ec-45ed-c613-4a731d04a82f"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Completed!\n"
+          ]
+        }
+      ],
+      "source": [
+        "!pip install flask --quiet\n",
+        "!pip install flask-ngrok --quiet\n",
+        "print(\"Completed!\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "S7NrKdzo9ULv",
+        "outputId": "c2ecc1af-a19a-4cd1-ec16-d4271be2bda6"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "--2022-09-26 10:13:53--  https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz\n",
+            "Resolving bin.equinox.io (bin.equinox.io)... 54.161.241.46, 52.202.168.65, 54.237.133.81, ...\n",
+            "Connecting to bin.equinox.io (bin.equinox.io)|54.161.241.46|:443... connected.\n",
+            "HTTP request sent, awaiting response... 200 OK\n",
+            "Length: 13770165 (13M) [application/octet-stream]\n",
+            "Saving to: ‘ngrok-stable-linux-amd64.tgz.1’\n",
+            "\n",
+            "ngrok-stable-linux- 100%[===================>]  13.13M  52.8MB/s    in 0.2s    \n",
+            "\n",
+            "2022-09-26 10:13:54 (52.8 MB/s) - ‘ngrok-stable-linux-amd64.tgz.1’ saved [13770165/13770165]\n",
+            "\n"
+          ]
+        }
+      ],
+      "source": [
+        "# 다음의 명령어로 ngrok linux version 을 설치\n",
+        "\n",
+        "!wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "CJ5GkiRv9WGq",
+        "outputId": "930bffb6-b8a4-4d50-8073-b2c04bcddbfc"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "ngrok\n"
+          ]
+        }
+      ],
+      "source": [
+        "# 압축 해제\n",
+        "\n",
+        "!tar -xvf /content/ngrok-stable-linux-amd64.tgz"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "8dnuryNO9XvX",
+        "outputId": "994d2f84-7718-4948-cd79-7f5dcd0ed68f"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Authtoken saved to configuration file: /root/.ngrok2/ngrok.yml\n"
+          ]
+        }
+      ],
+      "source": [
+        "# ngrok 사이트 (https://dashboard.ngrok.com/get-started/setup)에서 회원가입을 한뒤\n",
+        "# \"Your Authtoken\" 탭을 클릭하여 authtoken을 복사하여 붙여넣습니다.\n",
+        "\n",
+        "!./ngrok authtoken 2AobOWreg1Cj5sYHFJ4rCPyQBt4_6HVVnb8nMQ4MFvKRzePCi"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "nZhCjxpn9ZGY"
+      },
+      "outputs": [],
+      "source": [
+        "# 플라스크 임포트\n",
+        "from flask import Flask\n",
+        "from flask import render_template, request\n",
+        "from flask_ngrok import run_with_ngrok"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "rD8hyXFlRt8G"
+      },
+      "outputs": [],
+      "source": [
+        "# softmax 와 threshold 를 사용하는 새로운 인퍼런스 함수\n",
+        "import torch\n",
+        "import torch.nn.functional as F\n",
+        "\n",
+        "def inference_with_softmax(text):\n",
+        "  encoding = tokenizer(text, return_tensors = 'pt')\n",
+        "  encoding = {k: v.to(trainer.model.device) for k,v in encoding.items()}\n",
+        "\n",
+        "  outputs = trainer.model(**encoding)\n",
+        "\n",
+        "  logits = outputs.logits\n",
+        "\n",
+        "  probs = logits.squeeze().cpu()\n",
+        "  softmax_probs = F.softmax(probs, dim=-1)\n",
+        "  labels_predict = np.where(softmax_probs==softmax_probs.max())[0][0]\n",
+        "\n",
+        "  if softmax_probs[labels_predict] < 0.97:\n",
+        "    return '기타'\n",
+        "  else:\n",
+        "    return id2label[labels_predict]"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "8YUPS6v9d05K"
+      },
+      "outputs": [],
+      "source": [
+        "import random\n",
+        "\n",
+        "def answer_sentence(pred):\n",
+        "\n",
+        "  if pred == '날씨 묻기':\n",
+        "\n",
+        "      date= ['오늘', '내일', '어제', '그저께', '내일 모레']\n",
+        "      choice_date = random.choice(date)\n",
+        "\n",
+        "      weather_2 = ['추워요.', '따뜻해요.', '조금 쌀쌀해요.', '비가 올 것 같아요.' ,'태풍이 와요.', '바람이 불어요.', '더워요.']\n",
+        "      choice_weather_2= random.choice(weather_2)\n",
+        "\n",
+        "      attractions_2= ['제주시', '서귀포시', '애월읍', '안덕면', '성산읍', '조천읍', '구좌읍', '한림읍', '남원읍']\n",
+        "      choice_attractions_2 = random.choice(attractions_2)\n",
+        "\n",
+        "      sentence = f'{choice_date}, {choice_attractions_2}의 날씨는 {choice_weather_2}'\n",
+        "\n",
+        "  elif pred == '관광지 추천':\n",
+        " \n",
+        "    attraction = ['쇠소깍', '용머리해안', '함덕 해수욕장', '우도']\n",
+        "    choice_attraction = random.choice(attraction)\n",
+        " \n",
+        "    nice = ['경치 좋은', '바다가 예쁜', '단체로 갈 만한', '사진찍기 좋은']\n",
+        "    choice_nice = random.choice(nice)\n",
+        " \n",
+        "    sentence = f'제주 {choice_nice}, {choice_attraction} 가 보세요!'\n",
+        "\n",
+        "\n",
+        "  elif pred == '숙소 추천':\n",
+        "    accomodation = ['베니키아 호텔', '위드 스테이 호텔 제주', '제주 라온 호텔', '신신호텔 천지연']\n",
+        "    choice_accomodation = random.choice(accomodation)\n",
+        "\n",
+        "    location = ['애월에 있는', '제주시에 있는', '한림에 있는', '서귀포에 있는']\n",
+        "    choice_location = random.choice(location)\n",
+        "\n",
+        "    sentence = f'제주 {choice_location}, {choice_accomodation} 가 보시는 건 어떠세요?'\n",
+        "  \n",
+        "  elif pred == '맛집 추천':\n",
+        "\n",
+        "    restaurant = ['숙성도', '빵귿', '살찐 고등어', '복집식당']\n",
+        "    choice_restaurant = random.choice(restaurant)\n",
+        "\n",
+        "    delicious = ['삼겹살이 맛있는', '빵이 맛있는', '고등어가 유명한', '갈치구이 유명한']\n",
+        "    choice_delicious = random.choice(delicious)\n",
+        "    sentence = f'제주 {choice_delicious}, {choice_restaurant} 어떠세요?'\n",
+        "  \n",
+        "  elif pred=='인사':\n",
+        "    greeting = ['안녕하세요','혼저 옵서예','안녕하우꽈','옵데강, 혼저오십서.']\n",
+        "    choice_greeting = random.choice(greeting)\n",
+        "\n",
+        "    closing = ['궁금한것을 알려드려요~!','궁금한것을 물어보세요~!','무엇이든 물어보세요~!']\n",
+        "    choice_closing = random.choice(closing)\n",
+        "\n",
+        "    sentence = f'{choice_greeting} 저는 제주 관광 챗봇 입니다. {choice_closing}'\n",
+        "\n",
+        "  elif pred == '소개':\n",
+        "    sentence = '저는 제주도의 <날씨>,<숙소>,<맛집>,<활동>,<카페> 기능에 관하여 이용이 가능합니다.'\n",
+        "\n",
+        "  elif pred == \"활동 추천\":\n",
+        "\n",
+        "    act_1 = [\"인기 많은\",\"즐거운\",\"재밌는\"]\n",
+        "    choice_act_1 = random.choice(act_1)\n",
+        "\n",
+        "    act_2 =[\"둘레길 걷기\",\"오름 방문\",\"바닷길 드라이브\"]\n",
+        "    choice_act_2 = random.choice(act_2)\n",
+        "    sentence = f\"{choice_act_1}, {choice_act_2} 해보는 건 어때요?\"\n",
+        "\n",
+        "  elif pred == '카페 추천':\n",
+        "    cafe=['제주특별자치도 제주시 한경면 낙원로 32 에 있는 산노루','제주특별자치도 서귀포시 이어도로1027번길 34에 있는 카페 귤 꽃다락','제주특별자치도 서귀포시 516로 717에 있는 서귀다원','제주특별자치도 제주시 은수길 110 2F에 있는 우연못']\n",
+        "    choice_cafe = random.choice(cafe)\n",
+        "    ending=['어떠세요?','가보세요~!','가보는걸 추천 드립니다!','추천 합니다.']\n",
+        "    choice_ending=random.choice(ending)\n",
+        "    sentence = f'{choice_cafe},{choice_ending}'\n",
+        "  \n",
+        "  else:\n",
+        "    sentence = \"죄송한데, 무슨 말씀인지 잘 모르겠어요.\"\n",
+        "  \n",
+        "  return sentence"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "E0texQt3x0Ts"
+      },
+      "outputs": [],
+      "source": [
+        "# 입력 : 사용자가 입력한 텍스트\n",
+        "# 출력 : 의도에 대한 답변\n",
+        "\n",
+        "def answer(text):\n",
+        "  \n",
+        "  pred = inference_with_softmax(text)\n",
+        "  # pred = inference(text)\n",
+        "  \n",
+        "  # id2label.values() : dict_values(['날씨 묻기', '관광지 추천', '숙소 추천', '맛집 추천', '인사', '소개', '활동 추천', '카페 추천'])\n",
+        "  if pred in id2label.values():\n",
+        "    return (True, answer_sentence(pred))\n",
+        "  else:\n",
+        "    return (False, answer_sentence(pred))"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "fHnXv-wLPzF6"
+      },
+      "outputs": [],
+      "source": [
+        "def answer_system(input_text):\n",
+        "  \n",
+        "  print(\"안녕하세요, 무엇을 도와드릴까요?\")\n",
+        "  _, sentence = answer(input_text)\n",
+        "  \n",
+        "  return sentence "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "background_save": true,
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-YCqWQjJSSW9",
+        "outputId": "938a8414-cd60-4e9d-afbd-cdb78df6f822"
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            " * Serving Flask app \"__main__\" (lazy loading)\n",
+            " * Environment: production\n",
+            "\u001b[31m   WARNING: This is a development server. Do not use it in a production deployment.\u001b[0m\n",
+            "\u001b[2m   Use a production WSGI server instead.\u001b[0m\n",
+            " * Debug mode: off\n"
+          ]
+        },
+        {
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "INFO:werkzeug: * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)\n"
+          ]
+        },
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            " * Running on http://1b99-35-237-57-249.ngrok.io\n",
+            " * Traffic stats available on http://127.0.0.1:4040\n"
+          ]
+        },
+        {
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:11] \"\u001b[37mGET / HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:12] \"\u001b[37mGET /static/css/style.css HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:12] \"\u001b[37mGET /static/images/photo-1.jpg HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:12] \"\u001b[37mGET /static/js/slideshow.js HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:12] \"\u001b[37mGET /static/images/photo-2.jpg HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:12] \"\u001b[37mGET /static/images/photo-3.jpg HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:12] \"\u001b[37mGET /static/images/icon-1.jpg HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:12] \"\u001b[37mGET /static/images/icon-3.jpg HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:12] \"\u001b[37mGET /static/images/icon-2.jpg HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:13] \"\u001b[37mGET /static/images/img-1.jpg HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:13] \"\u001b[37mGET /static/images/img-2.jpg HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:13] \"\u001b[37mGET /static/images/sns-1.png HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:13] \"\u001b[37mGET /static/images/sns-2.png HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:13] \"\u001b[37mGET /static/images/img-3.jpg HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:13] \"\u001b[37mGET /static/images/sns-3.png HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:13] \"\u001b[33mGET /favicon.ico HTTP/1.1\u001b[0m\" 404 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:14] \"\u001b[37mGET /chat HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:15] \"\u001b[37mGET /static/css/chat.css HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:22] \"\u001b[37mGET /get?a=안녕%20챗봇아 HTTP/1.1\u001b[0m\" 200 -\n"
+          ]
+        },
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "안녕하세요, 무엇을 도와드릴까요?\n"
+          ]
+        },
+        {
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:22:36] \"\u001b[37mGET /get?a=그래그래%20커피%20맛있는%20곳%20추천해주렴 HTTP/1.1\u001b[0m\" 200 -\n"
+          ]
+        },
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "안녕하세요, 무엇을 도와드릴까요?\n"
+          ]
+        },
+        {
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:33:03] \"\u001b[37mGET / HTTP/1.1\u001b[0m\" 200 -\n",
+            "INFO:werkzeug:127.0.0.1 - - [26/Sep/2022 10:35:18] \"\u001b[37mGET /chat HTTP/1.1\u001b[0m\" 200 -\n"
+          ]
+        }
+      ],
+      "source": [
+        "from flask import Flask, url_for, redirect, render_template, request\n",
+        "\n",
+        "TEMPLATE_FOLDER = '/content/drive/MyDrive/중정처/이대/week_4/06/templates'\n",
+        "STATIC_FOLDER = '/content/drive/MyDrive/중정처/이대/week_4/06/static'\n",
+        "app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder = STATIC_FOLDER)\n",
+        "run_with_ngrok(app)\n",
+        "\n",
+        "@app.route('/')\n",
+        "def index():\n",
+        "    return render_template('index.html')\n",
+        "\n",
+        "@app.route('/chat') \n",
+        "def chatbot():\n",
+        "    return render_template('chat.html')\n",
+        "\n",
+        "@app.route('/get')\n",
+        "def get_bot_response():\n",
+        "    userText = request.args.get('a')\n",
+        "    return answer_system(userText)\n",
+        "\n",
+        "app.run()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "n1vbNJUltq6i"
+      },
+      "outputs": [],
+      "source": []
+    }
+  ],
+  "metadata": {
+    "colab": {
+      "collapsed_sections": [],
+      "provenance": []
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
