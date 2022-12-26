@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>고급 선택자</title>
+  <style>
+    body {
+        background-color: rgb(199, 254, 236);
+    }
+    #container {
+        width: 500px;
+        margin: 20px auto;
+    }
+    p   {
+        width: 500px;
+        padding: 10px;
+    }
+    #container p {
+        background-color: #fff;
+        border: 1px solid #ccc;
+    }
+    #container > p {
+        background-color: #fff;
+        border: 1px solid #ccc;
+    }
+    #container > div > p {
+        background-color: #222;
+        color: #fff;
+    }
+  </style>
+</head>
+<body>
+    <div id="container">
+        <p>텍스트가 들어갈 공간입니다.</p>
+        <h1>예약 및 요금 안내</h1>
+        <p>전화를 통해 신청부탁드립니다.<br>연락처 : 010-xxxx-xxxx</p>
+        <div>
+            <p>가족실(2~4인) : 48,000원/일</p>
+            <p>도미토리(4인 공용) : 16,000원/일</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>CSS position 속성</title>
+  <style>
+    p {
+      width:300px;
+      height:150px;
+      background-color:#eee;
+      border:1px solid #ccc;
+      line-height:2;
+      margin: 10px;
+    }
+    #static {
+      position:static;
+    }
+    #relative-1{
+      position:relative;
+    }
+    #relative-2{
+      position:relative;
+      left:100px; 
+      top:-50px;   
+    }
+    #absolute {
+      position:absolute;
+      left:100px;
+      top:70px  
+    }
+    #fixed {
+      position:fixed;
+      width:100px;
+      height:100px;
+      background-color:red;  
+      right:30px;  
+      top:30px;  
+    }
+  </style>
+</head>
+<body>
+   <p id="static">Ex et adipisicing voluptate aliqua cupidatat nulla. Laboris est sint sit aliqua enim. Aute Lorem eu sint aute sunt proident. </p>
+   <p id="relative-1">Do culpa consectetur elit duis laboris reprehenderit incididunt nulla. Pariatur fugiat voluptate ea non amet cupidatat. </p>
+   <div id="relative-2"><p>Lorem ipsum reprehenderit adipisicing exercitation enim velit veniam incididunt sit consectetur elit exercitation. </p>
+    <p id="absolute">Excepteur voluptate ad irure ipsum duis. Deserunt cupidatat commodo proident eu mollit cillum commodo quis quis et ad. </p>
+   </div>
+   <p id="fixed">저는 고정입니다.</p>
+</body>
+</html>
