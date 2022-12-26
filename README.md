@@ -1,4 +1,4 @@
-# AI job experience for non-majors
+#  Tourism Q&A chatbot model
 <p align="center">
 <img src="https://user-images.githubusercontent.com/115607856/209491597-a1942387-2e4f-41a2-a8b1-3080534536dd.jpg" width="150%" height="70%"/>
 </p>
