@@ -3,6 +3,8 @@
 <img src="https://user-images.githubusercontent.com/115607856/209492500-e01e8ecc-c7a8-41eb-9db1-dd9f1c91c25e.jpg" width="150%" height="70%"/>
 </p>
 
+![image](https://user-images.githubusercontent.com/115607856/209894309-5187d982-e0a8-40d2-aa4c-23a76e52a1ee.png)
+
 ## Tourism Q&A chatbot model
 <p align="center">
 <img src="https://user-images.githubusercontent.com/115607856/209491597-a1942387-2e4f-41a2-a8b1-3080534536dd.jpg" width="150%" height="70%"/>
